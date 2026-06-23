@@ -9,6 +9,7 @@ use App\Http\Resources\NoteResource;
 use App\Models\Note;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Facades\DB;
+use Throwable;
 
 class NoteController extends Controller
 {
@@ -22,9 +23,11 @@ class NoteController extends Controller
             $query->latest();
         }
 
+        $notes = $query->get();
+
         return response()->json([
             'status' => 'success',
-            'data' => NoteResource::collection($query->get()),
+            'data' => NoteResource::collection($notes),
         ]);
     }
 
@@ -36,6 +39,9 @@ class NoteController extends Controller
         ]);
     }
 
+    /**
+     * @throws Throwable
+     */
     public function store(NoteRequest $request): JsonResponse
     {
         $validated = $request->validated();
@@ -62,7 +68,7 @@ class NoteController extends Controller
     {
         $note = Note::query()->findOrFail($id);
 
-        $note->increment('likes_count');
+        $note->query()->increment('likes_count');
 
         return response()->json([
             'status' => 'success',
